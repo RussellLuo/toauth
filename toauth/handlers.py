@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import datetime
+
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from .database import DB
 from .settings import (
     USER, SESSION, SESSION_KEY, COOKIE_KEY
 )
+
+NOW = datetime.datetime.now
 
 
 class AuthHandlerMixin(object):
@@ -45,6 +49,7 @@ class AuthHandlerMixin(object):
 
         user = USER(**kwargs)
         user.set_password(password)
+        user.date_joined = NOW()
         self.db.add(user)
         self.db.commit()
 
@@ -57,6 +62,16 @@ class AuthHandlerMixin(object):
         This way a user doesn't have to reauthenticate on every request.
         If `next_url` is specified, redirect to it at last.
         """
+        # ## update scheme 1
+        # (self.db.query(USER).filter(USER.id == user.id)
+        #                     .update({'last_login': NOW()}))
+        # self.db.commit()
+
+        # ## update scheme 2
+        user.last_login = NOW()
+        self.db.merge(user)
+        self.db.commit()
+
         self.session[SESSION_KEY] = user.id
         self.session.save()
 

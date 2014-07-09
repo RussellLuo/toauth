@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 
 
-db_url = 'sqlite:///:memory:'
+db_url = 'sqlite:///sqlite.db'
 engine = create_engine(db_url)
 DB = scoped_session(sessionmaker(bind=engine))
 
